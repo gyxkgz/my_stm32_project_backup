@@ -1,0 +1,34 @@
+1、板子按键尽然不灵了，一直以为软件的问题，用万用表一测，按键接触不好了，而且即使通了电阻也很大，换了新的好了
+
+2、想用下面的代码实现延迟，刚开始没有加volatile就不行，加上了能用了
+void blocking_delay(volatile uint32_t ms)
+{
+  for (volatile uint32_t j=0;j<ms;j++)
+    for (volatile uint32_t i=0;i<72000;i++){};
+}
+
+3、
+// 方法2：使用DWT周期计数器（更精确）
+void dwt_delay_init(void)
+{
+    // 启用DWT周期计数器
+    CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
+    DWT->CYCCNT = 0;
+    DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
+}
+
+void dwt_delay_us(uint32_t us)
+{
+    uint32_t start = DWT->CYCCNT;
+    // 假设系统时钟72MHz，计算需要的周期数
+    uint32_t cycles = us * (SystemCoreClock / 1000000);
+    
+    while ((DWT->CYCCNT - start) < cycles);
+}
+
+void dwt_delay_ms(uint32_t ms)
+{
+    while (ms--) {
+        dwt_delay_us(1000);
+    }
+}

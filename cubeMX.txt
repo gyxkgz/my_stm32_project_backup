@@ -1,0 +1,12 @@
+修改repo位置：
+需要右键用管理员权限启动软件，在help->updater setting中改。
+
+配置：
+必选
+1、选芯片
+2、rcc选择时钟源
+3、sys配置调试接口，一般选择Serial Wire，使用swd调试口
+4、时钟树配置，
+
+用户定义
+gpio、tim、i2c、nvic等等。
