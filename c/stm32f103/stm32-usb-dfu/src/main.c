@@ -123,13 +123,13 @@ int main(void)
     __HAL_RCC_BKP_CLK_ENABLE() ;
     magic_value|=HAL_RTCEx_BKUPRead(&hrtc,RTC_BKP_DR1);
     magic_value|=HAL_RTCEx_BKUPRead(&hrtc,RTC_BKP_DR2)<<16;
-    printf("%lx\r\n",magic_value);
     if(magic_value==MAGIC_VALUE)
     {
       uint8_t tmp=HAL_RTCEx_BKUPRead(&hrtc,RTC_BKP_DR3);
       HAL_RTCEx_BKUPWrite(&hrtc,RTC_BKP_DR3,0);
       if(tmp!=RESET_TO_DFU){
-            jump_to_APP();
+          printf("jump to APP\n");
+          jump_to_APP();
       }
     }
   }else if(HAL_GPIO_ReadPin(GPIOC,GPIO_PIN_13))
