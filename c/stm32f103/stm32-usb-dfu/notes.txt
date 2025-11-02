@@ -1,0 +1,6 @@
+1、配合的app工程是stm32-key-led
+2、firmware-ld8.bin就是app固件
+3、stm32f103的系统bootloader只支持usart，不支持usb（boot0==1）
+4、__HAL_RCC_GET_FLAG(RCC_FLAG_SFTRST)返回的不是0或者1，而是对应标记位为0返回0，否则返回对应标记位为1的值
+    比如如果是软件复位（28位），则返回 10000000，我直接把这个赋值给了uint8_t的变量，只取低8位，所以一直是0。
+    解决办法是换成uint32_t的变量或者移位到最低位或者使用逻辑运算（如例程所示）
