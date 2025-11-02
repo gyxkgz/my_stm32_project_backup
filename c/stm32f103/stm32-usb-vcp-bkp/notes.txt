@@ -1,0 +1,11 @@
+1、usb的vcp默认就开了usb中断，当收到数据的时候，会自动调用CDC_Receive_FS函数，
+    它的第一个参数就是接收到的数据的指针，第二是接收数据长度，你要把这些数据在这
+    个函数中复制到其他地方；    一开始我以为需要主动调用这个函数，第一个参数放接
+    收buffer，第二个放长度变量，然后就不知道该怎么操作了，后来发现理解错了。它本
+    身就是回调函数。
+2、开启rtc后，除了加入了rtc相关的文件，还有rtc时钟在SystemClock_Config中添加配置，
+    这里其实只用备份域，rtc开不开其实没关系，主要是跟备份域相关的：
+      __HAL_RCC_PWR_CLK_ENABLE();
+      HAL_PWR_EnableBkUpAccess();
+      __HAL_RCC_BKP_CLK_ENABLE() ;
+    
