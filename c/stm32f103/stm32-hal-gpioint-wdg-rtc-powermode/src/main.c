@@ -227,7 +227,6 @@ int main(void)
         HAL_IWDG_Refresh(&hiwdg);
 #endif
     }   
-    /* USER CODE END WHILE */
     //press key1 enter low power mode
     if( GPIO_PIN_RESET == HAL_GPIO_ReadPin(key1_GPIO_Port,key1_Pin)){
        HAL_GPIO_TogglePin(led_GPIO_Port,led_Pin);
@@ -254,7 +253,7 @@ int main(void)
 #else
     curr_tick=HAL_GetTick();
 #endif
-
+    /* USER CODE END WHILE */
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
