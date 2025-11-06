@@ -1,0 +1,27 @@
+1、时钟频率是72Mhz，也就是1s振荡72000000次，那想要1ms就是72M/1000次；
+2、one-pulse模式：计数器在更新事件发生后停止计数，也就是不自动重载计数。
+3、输入捕获模式下，定时器的定时周期要大于输入信号的周期，不然会有溢出。
+
+* pwm模式：
+* TIMx_ARR 决定频率/周期
+* TIMx_CCRx 决定占空比
+* 两种模式：
+*   TIMx_CCMRx的OCxM bits：
+*     PWM mode 1（110）:TIMx_CNT<TIMx_CCR1 为active
+*     PWM mode 2（111）：TIMx_CNT>TIMx_CCR1 为active
+* 4个独立通道
+* TIx:输入
+* TIxF：滤波输入
+* 
+* 
+* PWM跟OC(输出比较)区别很明显，PWM是CNT小于CCR一个状态，大于CCR一个状态，OC是CNT=CCR置为指定的状态
+
+定时器配置：
+1、配置基础定时，这是其他功能的基础，包括：分频、计数模式、周期，BASE、PWM、OC、IC的初始化基本上都一样，单脉冲多一个设置OPM的操作
+init内部会调用对应的HAL_TIM_XXX_MspInit()函数（XXX：BASE、PWM、OC、IC），Msp初始化包括 GPIO, CLOCK, NVIC，
+之后在TIM_Base_SetConfig函数中才真正初始化定时器
+2、配置时钟源，定时器时钟源很多，主要在slave mode control register (TIMx_SMCR)中配置，时钟源跟slave mode紧密相关，
+不开启slave mode（SMS：000）就使用内部时钟，外部触发信号的频率，最高不能超过内部时钟频率的四分之一。
+使用HAL_TIM_ConfigClockSource配置某些时钟源和HAL_TIM_SlaveConfigSynchro选择TIM_SLAVEMODE_EXTERNAL1是一样的。
+3、进一步配置具体的功能（IC、OC、pwm），主要是ccmr和ccer寄存器；
+4、之后对应的xxx_start_xx()函数即可。
