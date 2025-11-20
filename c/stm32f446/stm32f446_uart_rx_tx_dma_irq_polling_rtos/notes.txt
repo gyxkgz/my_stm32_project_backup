@@ -1,0 +1,39 @@
+1、LL_DMA_IsActiveFlag_HT5这个函数每个stream都有，要根据stream编号选择对应的函数
+2、中断能执行不代表程序正常，这个实验中错误调用LL_DMA_IsActiveFlag_HT1导致DMA触发后一直有中断，使得主程序
+    无法运行，而中断程序可以运行。测试时一定要在主程序加led blink指示程序是否正常。
+3、加入freertos后需要添加编译选项-mfloat-abi=softfp，否则提示
+    C:\Users\10250\AppData\Local\Temp\ccUQS5EL.s:330: Error: selected processor does not support `vstmdbeq r0!,{s16-s31}' in Thumb mode
+    C:\Users\10250\AppData\Local\Temp\ccUQS5EL.s:332: Error: instruction not allowed in IT block -- `stmdb r0!,{r4-r11,r14}'
+    C:\Users\10250\AppData\Local\Temp\ccUQS5EL.s:352: Error: selected processor does not support `vldmiaeq r0!,{s16-s31}' in Thumb mode
+    C:\Users\10250\AppData\Local\Temp\ccUQS5EL.s:354: Error: instruction not allowed in IT block -- `msr psp,r0'
+    *** [.pio\build\genericSTM32F446RE\lib99b\FreeRTOS\portable\GCC\ARM_CM4F\port.o] Error 1
+    如果-mfloat-abi=hard,则会提示下面的错误
+    c:/users/10250/.platformio/packages/toolchain-gccarmnoneeabi@1.70201.0/bin/../lib/gcc/arm-none-eabi/7.2.1/../..
+    /../../arm-none-eabi/bin/ld.exe: error: .pio\build\genericSTM32F446RE\FrameworkHALDriver\Src\stm32f4xx_hal.o uses VFP register 
+    arguments, .pio\build\genericSTM32F446RE\firmware.elf does not
+    c:/users/10250/.platformio/packages/toolchain-gccarmnoneeabi@1.70201.0/bin/../lib/gcc/arm-none-eabi/7.2.1/../..
+    /../../arm-none-eabi/bin/ld.exe: failed to merge target specific data of file .pio\build\genericSTM32F446RE\
+    FrameworkHALDriver\Src\stm32f4xx_hal.o
+    解决办法是加一个脚本update_link_flags.py，内容如下：
+    # Custom settings, as referred to as 'extra_script' in platformio.ini
+    #
+    # See http://docs.platformio.org/en/latest/projectconf.html#extra-script
+    from SCons.Script import DefaultEnvironment
+    env = DefaultEnvironment()
+    env.Append(
+        LINKFLAGS=[
+            '-mthumb',
+            '-march=armv7e-m',
+            '-mfloat-abi=hard',
+            '-mfpu=fpv4-sp-d16'
+        ]
+    )
+4、中断的优先级不能高于LIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY
+5、最高优先级的任务中如果while死循环没有主动让出运行的api会独占系统，所以要不加入taskdelay、接收消息、队列、主动让出等等，要不优先级
+降低，相同优先级会依次执行，但优先级比它低的还是执行不了，所以死循环的任务优先级最好最低。
+6、FreeRTOS的抢占是"随时可能发生"的，不仅仅局限于SysTick时刻
+    SysTick中断 - 定期检查抢占（如每1ms）
+    API调用时 - 随时检查抢占（更频繁、更及时）
+    中断服务程序 - 通过portYIELD_FROM_ISR()触发
+7、串口dma发送需要使能LL_USART_EnableDMAReq_TX(USART2); 
+
